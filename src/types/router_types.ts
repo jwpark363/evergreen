@@ -1,0 +1,1 @@
+export type ROUTER = "intro" | "dashboard" | "member" | "application" |"event" | "notice"
