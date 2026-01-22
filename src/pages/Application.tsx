@@ -6,6 +6,9 @@ import type { Application } from '../types/application_types';
 import { getApplication } from '../api/application_api';
 import { ApplicationManagementModal } from '../components/application_modal';
 import { TableWrapper, Table, StatusBadge, IconButton } from '../components/table_styled';
+import type { Member } from '../types/member_types';
+import { useLoginStore } from '../state/login_state';
+import { checkAuth } from '../api/member_api';
 
 const Container = styled.div`
   display: flex;
@@ -78,6 +81,7 @@ const SearchWrapper = styled.div`
 // `;
 
 export default function ApplicationView(){
+    const {user} = useLoginStore();
     const [is_loading, setLoading] = useState(true);
     const [is_formopen, setFormOpen] = useState(false);
     const [applications, setApplications] = useState<Application[]>([]);
@@ -127,6 +131,7 @@ export default function ApplicationView(){
             {_applications.map((data,i) => 
                 <DataRow key={i} 
                     data={data}
+                    current_user={user}
                     openEditForm={openEditForm}
                 />
             ) }
@@ -143,9 +148,10 @@ export default function ApplicationView(){
 // 테이블 행 컴포넌트
 interface DataRowProps{
     data: Application
+    current_user: Member | null
     openEditForm: (data:Application) => void
 }
-const DataRow = ({ data, openEditForm }: DataRowProps) => (
+const DataRow = ({ data, current_user, openEditForm }: DataRowProps) => (
   <tr>
     <td>{data.name}</td>
     <td>{data.phone}</td>
@@ -153,7 +159,9 @@ const DataRow = ({ data, openEditForm }: DataRowProps) => (
     <td>{stringToYMD(data.applied_date)}</td>
     <td>
       <StatusBadge $active={data.status === 'wait'}>{data.status}</StatusBadge>
+      {checkAuth(current_user,undefined) &&
       <IconButton onClick={() => {openEditForm(data);}}><Settings size={16} /></IconButton>
+      }
     </td>
   </tr>
 );

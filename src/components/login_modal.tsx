@@ -4,6 +4,7 @@ import { loginWithUsername, type LoginData } from '../api/login_api';
 import { useState } from 'react';
 import type { ROUTER } from '../types/router_types';
 import { useLoginStore } from '../state/login_state';
+import { toast } from 'sonner';
 interface DataModalProps{
     setView: (menu:ROUTER) => void
 }
@@ -27,6 +28,7 @@ export default function LoginModal({ setView }: DataModalProps){
           setUser(result.login_user)
         }else{
           setView('dashboard');
+          toast.warning("전화번호 혹은 비밀번호가 잘못되었습니다.");
         }
       })();
       setOpen(false);

@@ -35,13 +35,14 @@ export async function getMembersByPhones(phones:string[]) {
     if (error) return null;
     return data
 }
-export function checkAuth(target_id:string | undefined, current_user:Member|undefined|null){
-    if(!target_id) return false;
-    if(!current_user) return false;
+export function checkAuth(current_user:Member | undefined | null,
+                            target_id:string | undefined){
     //본인것 이외는 총무와 간사, 그리고 지정된 사용자 만 수정 처리 가능함
+    if(!current_user) return false;
     if(current_user.id === SYSTEM_ADMIN_ID) return true;
-    if(target_id === current_user.id) return true;
     if(current_user.role in ADMIN_ROLE) return true;
+    if(!target_id) return false;
+    if(target_id === current_user.id) return true;
     return false;
 }
 export async function changePassword(new_password:string){

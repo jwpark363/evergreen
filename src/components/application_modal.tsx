@@ -5,7 +5,8 @@ import { addApplication, approveApplication, checkApplicationByPhone, rejectAppl
 import { ActionButton, ButtonGroup, Form, FormGroup, ModalContainer, ModalHeader, ModalOverlay } from './modal_styled';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { sendEmail } from '../api/send_mail';
+import { sendClubEmail } from '../api/emailjs_api';
+import { NOTICE_EMAIL_LIST } from '../datas/email_list';
 
 type DataFormInput = Omit<Application, "id"|"updated_at">
 interface ApplicationModalProps{
@@ -48,7 +49,13 @@ export function ApplicationModal({is_open, onClose}: ApplicationModalProps){
       "가입 신청되었습니다. 축구회 내부 확인후 처리될 예정이니 조금만 기다려주세요.",
       { duration: 6500 }
     );
-    sendEmail("신규가입자가 등록 되었습니다. 확인해주세요.");
+    //이메일 알림
+    sendClubEmail({
+      title: "신규 가입자 알림 메일",
+      email: NOTICE_EMAIL_LIST.APPLICATION.join(","), // 수신자 이메일
+      name: "늘푸른 축구회",                            // 발신자명
+      message: `${data.name}님 이 가입 신청을 하였습니다.`// 발신 내용
+    });
   };
   const checkPhoneNumber = () => {
     console.log('중복 체크');

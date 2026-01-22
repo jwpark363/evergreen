@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
-import { newMember, type Member } from '../types/member_types';
+import { newMember, ROLE, type Member } from '../types/member_types';
 import { addMember, changePassword, checkAuth, updateMember } from '../api/member_api';
 import { ActionButton, ButtonGroup, Form, FormGroup, ModalContainer, ModalHeader, ModalOverlay } from './modal_styled';
 import { toast } from 'sonner';
@@ -23,11 +23,11 @@ export default function MemberModal({member_id, is_open, onClose, init_data }: M
 
   if (!is_open) return null;
   const onSubmit = (data: MemberFormInput) => {
-    if(!checkAuth(member_id,user)){
+    if(!checkAuth(user,member_id)){
       toast.warning("권한이 없습니다.");
       return;
     }
-    if(member_id && checkAuth(member_id, user)){
+    if(member_id && checkAuth(user,member_id)){
       //업데이트
       (async () => {
         const result = await updateMember(member_id, data);
@@ -53,21 +53,16 @@ export default function MemberModal({member_id, is_open, onClose, init_data }: M
         <Form onSubmit={handleSubmit(onSubmit)}>
           <FormGroup>
             <label>이름 <span>*</span></label>
-            <input {...register("name", { required: true })} placeholder="이름 입력" />
+            <input {...register("name", { required: true })} placeholder="이름 입력"/>
           </FormGroup>
           <FormGroup>
             <label>역할</label>
             <select {...register("role",{ required: true })}>
-              <option value="P">회장</option>
-              <option value="A">감사</option>
-              <option value="SVP">수석부회장</option>
-              <option value="VP">부회장</option>
-              <option value="DIR">감독</option>
-              <option value="COA">코치</option>
-              <option value="GM">총무</option>
-              <option value="AS">간사</option>
-              <option value="ADV">고문</option>
-              <option value="MEM">회원</option>
+              {Object.entries(ROLE).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
             </select>
           </FormGroup>
           <FormGroup>
@@ -139,7 +134,9 @@ export default function MemberModal({member_id, is_open, onClose, init_data }: M
           </FormGroup>
           <ButtonGroup>
             <ActionButton type="button" onClick={onClose}>닫기</ActionButton>
-            <ActionButton type="submit" $primary>{init_data ? '수정' : '추가'}</ActionButton>
+            {(member_id && checkAuth(user,member_id)) &&
+              <ActionButton type="submit" $primary>{init_data ? '수정' : '추가'}</ActionButton>
+            }
           </ButtonGroup>
         </Form>
       </ModalContainer>

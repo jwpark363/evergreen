@@ -4,6 +4,7 @@ import { EVENT_STATUS, type Event } from '../types/event_types';
 import { useLoginStore } from '../state/login_state';
 import { useState } from 'react';
 import { VoteModal } from './event_modal';
+import { checkAuth } from '../api/member_api';
 
 const CardContainer = styled.div`
   background: white;
@@ -129,7 +130,9 @@ export default function EventCard({ data, handleClick, handleLoading }: EventPro
             { !isVoted() && <StampBadge $status="vote">참석? 불참?</StampBadge> }
           </div>
         </div>
+        { checkAuth(user, undefined) &&
         <EditButton onClick={handleClick}><Edit2 size={16} /></EditButton>
+        }
       </CardHeader>
       <CardBody>
         <p className="description">{data.description}</p>

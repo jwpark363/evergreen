@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import { stringToYMD } from "../libs/DateUtil";
 import NoticeModal from "../components/notice_modal";
 import { Edit2, Plus } from "lucide-react";
+import { useLoginStore } from "../state/login_state";
+import { checkAuth } from "../api/member_api";
+import type { Member } from "../types/member_types";
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -60,6 +63,7 @@ const EditButton = styled.button`
   &:hover { color: #333; }
 `;
 export default function NoticeBoard(){
+    const {user} = useLoginStore();
     const [is_loading, setLoading] = useState(true);
     const [is_formopen, setFormOpen] = useState(false);
     const [notices, setNotice] = useState<Notice[]>([]);
@@ -84,21 +88,23 @@ export default function NoticeBoard(){
           <h1>공지사항</h1>
           <p>중요한 소식과 안내를 확인하세요</p>
         </div>
+        { checkAuth(user,undefined) &&
         <AddButton onClick={() => setFormOpen(true)}>
           <Plus size={18} /> 일정 추가
         </AddButton>
+        }
       </Header>
         <Section>
             <SectionTitle>📌 고정된 공지</SectionTitle>
             {notices.filter(data => data.is_pinned === true).map((notice, i) => (
-                <NoticeItem key={i} notice={notice} handleClick={()=>openEditForm(notice)} />
+                <NoticeItem key={i} notice={notice} current_user={user} handleClick={()=>openEditForm(notice)} />
             ))}
         </Section>
 
         <Section>
         <SectionTitle>일반 공지</SectionTitle>
         {notices.filter(data => data.is_pinned !== true).map((notice, i) => (
-            <NoticeItem key={i} notice={notice} handleClick={()=>openEditForm(notice)} />
+            <NoticeItem key={i} notice={notice} current_user={user} handleClick={()=>openEditForm(notice)} />
         ))}
         </Section>
     </Container>
@@ -111,13 +117,16 @@ export default function NoticeBoard(){
 
 interface NoticeItemProps{
     notice: Notice
+    current_user: Member | null
     handleClick: () => void
 }
-function NoticeItem({notice, handleClick}:NoticeItemProps){
+function NoticeItem({notice, current_user, handleClick}:NoticeItemProps){
     return(
         <NoticeCard $pinned={notice.is_pinned}>
             <NoticeTitle>{notice.title}
-            <EditButton onClick={handleClick}><Edit2 size={16} /></EditButton>
+            { checkAuth(current_user,undefined) &&
+              <EditButton onClick={handleClick}><Edit2 size={16} /></EditButton>
+            }
             </NoticeTitle>
             <Meta>
             {notice.author} · {stringToYMD(notice.created_at)} · 조회 {notice.views}

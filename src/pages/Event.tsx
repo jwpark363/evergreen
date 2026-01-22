@@ -5,6 +5,8 @@ import { getEvent } from '../api/event_api';
 import EventCard from '../components/event_card';
 import type { Event } from '../types/event_types';
 import EventModal from '../components/event_modal';
+import { useLoginStore } from '../state/login_state';
+import { checkAuth } from '../api/member_api';
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -31,6 +33,7 @@ const MainLayout = styled.div`
   @media (max-width: 1024px) { grid-template-columns: 1fr; }
 `;
 export default function EventView(){
+    const {user} = useLoginStore();  
     const [is_loading, setLoading] = useState(true);
     const [is_formopen, setFormOpen] = useState(false);
     const [events, setEvents] = useState<Event[]>([]);
@@ -62,9 +65,11 @@ export default function EventView(){
           <h1>일정 관리</h1>
           <p>동호회의 주요 행사를 관리하세요</p>
         </div>
+      { checkAuth(user, undefined) &&
         <AddButton onClick={() => setFormOpen(true)}>
           <Plus size={18} /> 일정 추가
         </AddButton>
+      }
       </Header>
 
     <p>예정 / 진행 일정</p>

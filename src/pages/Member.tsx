@@ -3,7 +3,7 @@ import { Search, UserPlus, Settings, KeySquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import MemberModal, { PasswordModal } from '../components/member_modal';
 import { ROLE, MEMBER_STATUS as STATUS, type Member } from '../types/member_types';
-import { getMembers } from '../api/member_api';
+import { checkAuth, getMembers } from '../api/member_api';
 import { stringToYMD } from '../libs/DateUtil';
 import { TableWrapper, Table, StatusBadge, IconButton } from '../components/table_styled';
 import { useLoginStore } from '../state/login_state';
@@ -47,22 +47,6 @@ const SearchWrapper = styled.div`
     &::placeholder { color: #a0aec0; }
   }
 `;
-// const StatusBadge = styled.span<{ $active: boolean }>`
-//   padding: 4px;
-//   border-radius: 8px;
-//   font-size: 10px;
-//   font-weight: 600;
-//   background: ${props => props.$active ? '#1e293b' : '#f1f5f9'};
-//   color: ${props => props.$active ? 'white' : '#94a3b8'};
-// `;
-// const IconButton = styled.button<{ $color?: string }>`
-//   background: none;
-//   border: none;
-//   cursor: pointer;
-//   color: ${props => props.$color || '#94a3b8'};
-//   transition: color 0.2s;
-//   &:hover { color: ${props => props.$color ? '#c53030' : '#4a5568'}; }
-// `;
 export default function MemberView(){
     const {user} = useLoginStore();  
     const [is_loading, setLoading] = useState(true);
@@ -107,9 +91,11 @@ export default function MemberView(){
           <h1>회원 관리</h1>
           <p>총 {members.length}명의 회원이 등록되어 있습니다</p>
         </div>
-        <AddButton onClick={() => {setFormOpen(true); setFormData(undefined);}}>
-          <UserPlus size={18} /> 회원 추가
-        </AddButton>
+        {checkAuth(user,undefined) && 
+          <AddButton onClick={() => {setFormOpen(true); setFormData(undefined);}}>
+            <UserPlus size={18} /> 회원 추가
+          </AddButton>
+}
       </Header>
       {/* 검색 바 */}
       <SearchWrapper>
@@ -121,7 +107,7 @@ export default function MemberView(){
         <Table>
           <thead>
             <tr>
-              <th>이름</th><th>전화번호</th><th>역할</th><th>가입일</th><th>상태</th>
+              <th>회원</th><th>전화번호</th><th>가입일</th><th>상태</th>
               {/* <th style={{ textAlign: 'center' }}>관리</th> */}
             </tr>
           </thead>
@@ -167,9 +153,8 @@ interface MemberRowProps{
 }
 const MemberRow = ({ current_user, member, openEditForm, openPwdForm }: MemberRowProps) => (
   <tr>
-    <td>{member.name}</td>
+    <td>{member.name} {ROLE[member.role]}</td>
     <td>{member.phone}</td>
-    <td>{ROLE[member.role]}</td>
     <td>{stringToYMD(member.join_date)}</td>
     <td>
       <StatusBadge $active={member.status === 'active'}>{STATUS[member.status]}</StatusBadge>
